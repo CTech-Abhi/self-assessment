@@ -1,0 +1,33 @@
+{
+  "name": "pixi-project",
+  "version": "0.0.1",
+  "description": "Pixi.js project demo game using TypeScript, Webpack and Jest",
+  "scripts": {
+    "build": "cross-env NODE_ENV=production webpack",
+    "serve": "webpack-dev-server --hot",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CTech-Abhi/BlackJack-Demo"
+  },
+  "author": "Abhishek Singhal <abhicasinotech@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^5.1.1",
+    "cross-env": "^7.0.2",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "ts-jest-resolver": "^2.0.1",
+    "ts-loader": "^6.2.2",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "gsap": "^3.11.5",
+    "pixi.js": "6.3.2"
+  }
+}
