@@ -5,6 +5,11 @@ export interface IWinline {
   payout: number;
 }
 
+export interface IwheelMathData {
+  value: number;
+  weight: number;
+}
+
 export class Model {
   private static instance: Model;
   private reelset: string[][] = [
@@ -179,14 +184,57 @@ export class Model {
     },
   };
 
+  private wheelPrizes: IwheelMathData[] = [
+    { value: 5000, weight: 4 },
+    { value: 200, weight: 100 },
+    { value: 1000, weight: 20 },
+    { value: 400, weight: 50 },
+    { value: 2000, weight: 10 },
+    { value: 200, weight: 100 },
+    { value: 1000, weight: 20 },
+    { value: 400, weight: 50 },
+  ];
+
+  private wheelValues: number[] = [];
+  private totalWheelWeight: number = 0;
+
   /**
    * The Singleton's constructor should always be private to prevent direct
    * construction calls with the `new` operator.
    */
-  private constructor() {}
+  private constructor() {
+    for (let i = 0; i < this.wheelPrizes.length; i++) {
+      this.totalWheelWeight += this.wheelPrizes[i].weight;
+      this.wheelPrizes[i].weight = this.totalWheelWeight;
+      this.wheelValues.push(this.wheelPrizes[i].value);
+    }
+  }
 
   get totalWinAmount() {
     return this.totalWin;
+  }
+
+  get wheelPrizeList() {
+    return this.wheelValues;
+  }
+
+  get weightedWheelPrize() {
+    let randomPrizefactor: number = Math.random() * this.totalWheelWeight;
+    let awardedPrizeIndex = 0;
+    for (let i = 0; i < this.wheelPrizes.length; i++) {
+      if (this.wheelPrizes[i].weight >= randomPrizefactor) {
+        awardedPrizeIndex = i;
+        break;
+      }
+    }
+
+    console.log(
+      "Awarding Prize  ::    ",
+      awardedPrizeIndex,
+      randomPrizefactor,
+      this.wheelPrizes
+    );
+    return awardedPrizeIndex;
   }
 
   get randomBet() {

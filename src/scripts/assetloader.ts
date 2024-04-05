@@ -36,6 +36,7 @@ export class assetloader extends PIXI.Container {
       .add("lv4", "../images/lv4_symbol.png")
       .add("bg", "../images/background.png")
       .add("spin", "../images/spin_button.png")
+      .add("wheelSlice", "../images/wheelSlice.png")
       .add("wheel_center", "../images/wheel_center.png");
 
     this.loader.load(this.onLoadComplete.bind(this));
