@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 
-export class reel extends PIXI.Container {
+export class Reel extends PIXI.Container {
   private reelContainer: PIXI.Container = new PIXI.Container();
 
   constructor() {

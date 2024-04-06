@@ -1,7 +1,8 @@
 // app.ts
 
 import * as PIXI from "pixi.js";
-import { slotCreator } from "./slotCreator";
+import { PreLoader } from "./PreLoader";
+import * as constants from "./config/constants.json";
 
 interface EngineParams {
   containerId: string;
@@ -37,8 +38,8 @@ class Engine {
 
 const engineProps = {
   containerId: "game",
-  canvasW: 1280,
-  canvasH: 720,
+  canvasW: constants.viewport.width,
+  canvasH: constants.viewport.height,
   fpsMax: 60,
 };
 const engine = new Engine(engineProps);
@@ -67,7 +68,7 @@ function onWondowLoad() {
 
 function startDemo() {
   console.log("DEMO STARTED ......");
-  engine.stage.addChild(new slotCreator());
+  engine.stage.addChild(new PreLoader());
 }
 
 function render() {

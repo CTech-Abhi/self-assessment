@@ -1,0 +1,76 @@
+{
+    "viewport": {
+        "width": 1280,
+        "height": 720
+    },
+
+    "background" : {
+        "sprite": "bg"
+    },
+
+    "GAMESTATE": {
+        "INIT": "init",
+        "BASEGAME": "baseGame",
+        "BONUSGAME": "bonusGame"
+    },
+
+    "maxWinPanelHeight": 250,
+
+    "mainGameCountUpFont": {
+        "fontSize": 24,
+        "fill": "#ece4e4",
+        "fontWeight": "bold"
+    },
+
+    "BALANCE_METER": {
+        "balnceMeterTextStyle": {
+        "wordWrap": true,
+        "fill": "#ece4e4",
+        "wordWrapWidth": 800
+      },
+      "X": 750,
+      "Y": 520
+    },
+
+    "winCountUpMargin": 20,
+
+    "SPIN_BTN": {
+        "SPRITE": "wheel_center",
+        "NAME": "spinBtn",
+        "X": 1000, "Y":400, "TEXT": "SPIN"
+    },
+    "BONUS_BTN": {
+        "SPRITE": "wheel_center",
+        "NAME": "bonusBtn",
+        "X": 1000, "Y":150, "TEXT": "BONUS"
+    },
+    "WHEEL_BTN": {
+        "SPRITE": "wheel_center",
+        "NAME": "wheelBtn",
+        "X": 1000, "Y":275, "TEXT": "START"
+    },
+
+    "WIN_TEXT": {"X":350, "Y":520},
+    "STOP_POS_TEXT": {"X":75, "Y":520},
+
+    "REEL_START_POSITION": {"X":70, "Y":30},
+    "SYMBOL_SIZE": 160,
+
+    "WHEEL": {
+        "SLICE_ANGLE": 45,
+        "SLICE_SPRITE": "wheelSlice",
+        "SLICE_TEXT_OFFSET_Y": -50,
+        
+        "BANNER": {
+            "WIDTH":560, "HEIGHT": 280, "WIN_AMOUNT_OFFSET_Y":30
+        },
+
+        "X":450, "Y":275, "MIN_SPIN_COUNT": 5,
+        "SPIN_TIME": 8,
+
+        "CELEBRATION": {
+            "APPEAR_DELAY": 0.5, "APPEAR_DURATION": 0.5,
+            "COUNT_UP_DURATION": 1, "CLOSING_DELAY": 1, "BALANCE_ADDITION_DELAY": 1
+        }
+    }
+}

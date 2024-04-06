@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import { TextStyle } from "pixi.js";
 
-export class assetloader extends PIXI.Container {
+export class Assetloader extends PIXI.Container {
   private loader: PIXI.Loader = PIXI.Loader.shared;
   private gameContainer: PIXI.Container;
   private loadingProgressText: PIXI.Text;
@@ -25,6 +25,14 @@ export class assetloader extends PIXI.Container {
   }
 
   public startLoad(): Promise<void> {
+    PIXI.LoaderResource.setExtensionLoadType(
+      "wav",
+      PIXI.LoaderResource.LOAD_TYPE.XHR
+    );
+    PIXI.LoaderResource.setExtensionXhrType(
+      "wav",
+      PIXI.LoaderResource.XHR_RESPONSE_TYPE.BLOB
+    );
     this.loader
       .add("hv1", "../images/hv1_symbol.png")
       .add("hv2", "../images/hv2_symbol.png")
@@ -36,8 +44,16 @@ export class assetloader extends PIXI.Container {
       .add("lv4", "../images/lv4_symbol.png")
       .add("bg", "../images/background.png")
       .add("spin", "../images/spin_button.png")
+      .add("pointer", "../images/pointer.png")
       .add("wheelSlice", "../images/wheelSlice.png")
-      .add("wheel_center", "../images/wheel_center.png");
+      .add("wheel_center", "../images/wheel_center.png")
+      .add("sndClick", "../sounds/wheel-click.wav")
+      .add("sndLanding", "../sounds/wheel-landing.wav")
+      .add("sndRollup", "../sounds/credits-rollup.wav");
+
+    /* sound.add("sndClick", "../sounds/wheel-click.wav");
+    sound.add("wheelSlice", "../images/wheelSlice.png");
+    sound.add("wheel_center", "../images/wheel_center.png"); */
 
     this.loader.load(this.onLoadComplete.bind(this));
     this.loader.onProgress.add(this.progressUpdate.bind(this));

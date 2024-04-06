@@ -1,14 +1,15 @@
 import * as PIXI from "pixi.js";
-import { Model } from "../model";
-import { reel } from "../reel";
+import { Model } from "../dataStore/Model";
+import { Reel } from "../Reel";
+import * as constants from "../config/constants.json";
 
 export class MainScreen extends PIXI.Container {
   private mainContainer: PIXI.Container = new PIXI.Container();
   private gameData: Model;
-  private reelStartPosition_x = 70;
-  private reelStartPosition_y = 30;
-  private reels: reel[] = [];
-  private symbolSize = 160;
+  private reelStartPosition_x = constants.REEL_START_POSITION.X;
+  private reelStartPosition_y = constants.REEL_START_POSITION.Y;
+  private reels: Reel[] = [];
+  private symbolSize = constants.SYMBOL_SIZE;
 
   constructor() {
     super();
@@ -19,7 +20,7 @@ export class MainScreen extends PIXI.Container {
   public init(): void {
     let initReels = this.gameData.stopSymbols;
     for (let i = 0; i < initReels.length; i++) {
-      let newReel = new reel();
+      let newReel = new Reel();
       newReel.fillWithSymbols(initReels[i]);
       newReel.scale.set(0.6);
       this.addChild(newReel);

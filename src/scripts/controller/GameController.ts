@@ -1,18 +1,29 @@
 import * as PIXI from "pixi.js";
-import { Model } from "./model";
+//import { sound } from "@pixi/sound";
+import { Model } from "../dataStore/Model";
 import { gsap, Linear } from "gsap";
-import { BonusScreen } from "./scene/BonusScreen";
-import { MainScreen } from "./scene/MainScreen";
+import { BonusScreen } from "../scene/BonusScreen";
+import { MainScreen } from "../scene/MainScreen";
+import * as constants from "../config/constants.json";
+import * as localizeText from "../config/en.json";
 
-export class gameController extends PIXI.Container {
+export interface IButtonView {
+  SPRITE: string;
+  NAME: string;
+  X: number;
+  Y: number;
+  TEXT: string;
+}
+
+export class GameController extends PIXI.Container {
   private gameData: Model;
   private winDisplay: PIXI.Text;
   private balanceDisplay: PIXI.Text;
   private stopDisplay: PIXI.Text;
-  private winDisplayMaxHeight = 350;
+  private winDisplayMaxHeight = constants.maxWinPanelHeight;
   private countup: PIXI.Text;
   private transitionLayer: PIXI.Sprite = new PIXI.Sprite();
-  private gameState: string = "init";
+  private gameState: string = constants.GAMESTATE.INIT;
   private gameButtons: PIXI.Sprite[] = [];
   private bonusScreen: BonusScreen;
   private mainScreen: MainScreen;
@@ -23,19 +34,21 @@ export class gameController extends PIXI.Container {
     this.winDisplay = this.createWinText();
     this.balanceDisplay = this.createBalanceMeter();
     this.stopDisplay = this.createStopDisplay();
-    this.bonusScreen = new BonusScreen();
-    this.mainScreen = new MainScreen();
 
-    const style = new PIXI.TextStyle({
-      fontSize: 24,
-      fill: "#ece4e4",
-      fontWeight: "bold",
+    this.mainScreen = new MainScreen();
+    this.bonusScreen = new BonusScreen({
+      balanceUpdate: this.updateBalance.bind(this),
+      switchScreens: this.startTransition.bind(this),
     });
-    this.countup = new PIXI.Text("", style);
+
+    this.countup = new PIXI.Text(
+      "",
+      new PIXI.TextStyle(constants.mainGameCountUpFont as PIXI.ITextStyle)
+    );
   }
 
   private setupUI() {
-    const mainBg = PIXI.Sprite.from("bg");
+    const mainBg = PIXI.Sprite.from(constants.background.sprite);
     this.addChild(mainBg);
     this.addChild(this.winDisplay);
     this.addChild(this.balanceDisplay);
@@ -46,15 +59,18 @@ export class gameController extends PIXI.Container {
 
     this.addChild(this.countup);
     this.countup.x = this.balanceDisplay.x;
-    this.countup.y = this.balanceDisplay.y + this.balanceDisplay.height + 20;
-    console.log(this.balanceDisplay.text);
+    this.countup.y =
+      this.balanceDisplay.y +
+      this.balanceDisplay.height +
+      constants.winCountUpMargin;
+
+    this.mainScreen.init();
+    this.bonusScreen.init();
   }
 
   public init() {
     this.setupUI();
 
-    this.mainScreen.init();
-    this.bonusScreen.init();
     this.addChild(this.mainScreen);
     this.addChild(this.bonusScreen);
 
@@ -65,14 +81,14 @@ export class gameController extends PIXI.Container {
 
     this.transitionLayer.destroy();
     this.transitionLayer = new PIXI.Sprite(PIXI.Texture.WHITE);
-    this.transitionLayer.width = 1280;
-    this.transitionLayer.height = 720;
+    this.transitionLayer.width = constants.viewport.width;
+    this.transitionLayer.height = constants.viewport.height;
 
     this.transitionLayer.alpha = 0;
     this.addChild(this.transitionLayer);
   }
 
-  private getButton(buttonName: string) {
+  private getButtonByName(buttonName: string) {
     let selectedButton;
     this.gameButtons.forEach((button) => {
       if (button.name == buttonName) {
@@ -84,113 +100,105 @@ export class gameController extends PIXI.Container {
   }
 
   private createBalanceMeter() {
-    const style = new PIXI.TextStyle({
-      wordWrap: true,
-      fill: "#ece4e4",
-      wordWrapWidth: 800,
-    });
-    const text = new PIXI.Text("Balance :", style);
+    const style = new PIXI.TextStyle(
+      constants.BALANCE_METER.balnceMeterTextStyle
+    );
+    const text = new PIXI.Text(localizeText.BALANCE_METER, style);
     this.addChild(text);
-    text.x = 750;
-    text.y = 520;
+    text.x = constants.BALANCE_METER.X;
+    text.y = constants.BALANCE_METER.Y;
     return text;
   }
 
   private updateBalance() {
-    this.balanceDisplay.text = "Balance : \n" + this.gameData.balance;
+    this.balanceDisplay.text =
+      localizeText.BALANCE_METER + this.gameData.balance;
+  }
+
+  private addButton(btnView: IButtonView) {
+    const mainButton = PIXI.Sprite.from(btnView.SPRITE);
+    mainButton.name = btnView.NAME;
+    mainButton.x = btnView.X;
+    mainButton.y = btnView.Y;
+    mainButton.interactive = true;
+    mainButton.cursor = "pointer";
+    this.addChild(mainButton);
+
+    if (btnView.TEXT) {
+      const style = new PIXI.TextStyle({
+        fontSize: 50,
+      });
+      const text = new PIXI.Text(btnView.TEXT, style);
+      text.anchor.set(0.5);
+      mainButton.addChild(text);
+    }
+
+    return mainButton;
   }
 
   private createSpinButton() {
-    const mainButton = PIXI.Sprite.from("wheel_center");
-    mainButton.name = "spinBtn";
-    mainButton.x = 1000;
-    mainButton.y = 400;
+    let mainButton = this.addButton(constants.SPIN_BTN);
     mainButton.scale.set(0.6);
     mainButton.anchor.set(0.5);
-    mainButton.interactive = true;
-    mainButton.cursor = "pointer";
-
-    this.addChild(mainButton);
     mainButton.on("pointerdown", this.handleSpinRequest, this);
-
-    const style = new PIXI.TextStyle({
-      fontSize: 50,
-      wordWrapWidth: 800,
-    });
-    const text = new PIXI.Text("SPIN", style);
-    text.anchor.set(0.5);
-    mainButton.addChild(text);
-
     return mainButton;
   }
   private createBonusButton() {
-    const mainButton = PIXI.Sprite.from("wheel_center");
-    mainButton.name = "bonusBtn";
-    mainButton.x = 1000;
-    mainButton.y = 150;
+    let mainButton = this.addButton(constants.BONUS_BTN);
     mainButton.scale.set(0.6);
     mainButton.anchor.set(0.5);
-    mainButton.interactive = true;
-    mainButton.cursor = "pointer";
-
-    this.addChild(mainButton);
     mainButton.on("pointerdown", this.startWheelBonus, this);
-
-    const style = new PIXI.TextStyle({
-      fontSize: 50,
-      wordWrapWidth: 800,
-    });
-    const text = new PIXI.Text("BONUS", style);
-    text.anchor.set(0.5);
-    mainButton.addChild(text);
     return mainButton;
   }
   private createWheelSpinButton() {
-    const mainButton = PIXI.Sprite.from("wheel_center");
-    mainButton.name = "wheelBtn";
-    mainButton.x = 1000;
-    mainButton.y = 275;
+    let mainButton = this.addButton(constants.WHEEL_BTN);
     mainButton.scale.set(0.6);
     mainButton.anchor.set(0.5);
-    mainButton.interactive = true;
-    mainButton.cursor = "pointer";
-
-    this.addChild(mainButton);
     mainButton.on("pointerdown", this.startWheelSpin, this);
-
-    const style = new PIXI.TextStyle({
-      fontSize: 50,
-      wordWrapWidth: 800,
-    });
-    const text = new PIXI.Text("START", style);
-    text.anchor.set(0.5);
-    mainButton.addChild(text);
     return mainButton;
   }
 
   private startWheelSpin() {
+    let wheelBtn: PIXI.Sprite | undefined = this.getButtonByName(
+      constants.WHEEL_BTN.NAME
+    );
+    this.disableButton(wheelBtn);
     this.bonusScreen.rotateWheel();
-    gsap.delayedCall(12, this.startTransition.bind(this));
+    // gsap.delayedCall(12, this.startTransition.bind(this));
   }
 
   private disableGameButtons() {
     this.gameButtons.forEach((button) => {
-      button.interactive = false;
-      button.alpha = 0.3;
+      this.disableButton(button);
     });
   }
 
   private enableGameButtons() {
     this.gameButtons.forEach((button) => {
       if (button.visible) {
-        button.interactive = true;
-        button.alpha = 1;
+        this.enableButton(button);
       }
     });
   }
 
+  private enableButton(button: PIXI.Sprite | undefined) {
+    if (!button) {
+      return;
+    }
+    button.interactive = true;
+    button.alpha = 1;
+  }
+  private disableButton(button: PIXI.Sprite | undefined) {
+    if (!button) {
+      return;
+    }
+    button.interactive = false;
+    button.alpha = 0.3;
+  }
+
   private startWheelBonus() {
-    console.log("Add transition ...");
+    // sound.play("sndClick");
+    this.disableGameButtons();
     this.startTransition();
   }
 
@@ -200,10 +208,10 @@ export class gameController extends PIXI.Container {
       fill: "#ece4e4",
       wordWrapWidth: 800,
     });
-    const text = new PIXI.Text("GOOD LUCK !!", style);
+    const text = new PIXI.Text(localizeText.GOOD_LUCK, style);
     this.addChild(text);
-    text.x = 350;
-    text.y = 520;
+    text.x = constants.WIN_TEXT.X;
+    text.y = constants.WIN_TEXT.Y;
     return text;
   }
 
@@ -214,12 +222,12 @@ export class gameController extends PIXI.Container {
       wordWrapWidth: 200,
     });
     const text = new PIXI.Text(
-      "STOP POSITIONS :- \n\n" + this.gameData.reelstops,
+      localizeText.STOP_POSITION + this.gameData.reelstops,
       style
     );
     this.addChild(text);
-    text.x = 75;
-    text.y = 520;
+    text.x = constants.STOP_POS_TEXT.X;
+    text.y = constants.STOP_POS_TEXT.Y;
     return text;
   }
 
@@ -228,6 +236,7 @@ export class gameController extends PIXI.Container {
     let bet = this.gameData.randomBet;
     const newReelStops: number[] = [];
 
+    this.disableGameButtons();
     console.log("Placing BET   ::     ", bet);
     this.gameData.placeBet();
     this.updateBalance();
@@ -238,7 +247,8 @@ export class gameController extends PIXI.Container {
     this.gameData.reelstops = newReelStops;
     this.mainScreen.updateReelsWithNewStop();
 
-    this.stopDisplay.text = "STOP POSITIONS :- \n\n" + this.gameData.reelstops;
+    this.stopDisplay.text =
+      localizeText.STOP_POSITION + this.gameData.reelstops;
     this.showWinDetails();
   }
 
@@ -248,13 +258,12 @@ export class gameController extends PIXI.Container {
     this.winDisplay.scale.set(1);
 
     let winData = totalWin
-      ? "total Win : " + this.gameData.totalWinAmount
-      : "GOOD LUCK !!";
+      ? localizeText.TOTAL_WIN + this.gameData.totalWinAmount
+      : localizeText.GOOD_LUCK;
     for (let i = 0; i < winLines.length; i++) {
       winData += "\n";
       winData +=
-        " - " +
-        "payline " +
+        localizeText.PAYLINE_TEXT +
         winLines[i].index +
         ", " +
         winLines[i].symbol +
@@ -274,6 +283,8 @@ export class gameController extends PIXI.Container {
     if (this.gameData.totalWinAmount) {
       this.disableGameButtons();
       this.addCountup();
+    } else {
+      this.enableGameButtons();
     }
   }
 
@@ -320,25 +331,35 @@ export class gameController extends PIXI.Container {
 
   private updateScreenState() {
     let reelsVisibility = true;
-    if (this.gameState == "basegame") {
-      this.gameState = "bonusgame";
+    if (this.gameState == constants.GAMESTATE.BASEGAME) {
+      this.gameState = constants.GAMESTATE.BONUSGAME;
       reelsVisibility = false;
     } else {
-      this.gameState = "basegame";
+      this.gameState = constants.GAMESTATE.BASEGAME;
     }
 
-    let wheelBtn: PIXI.Sprite | undefined = this.getButton("wheelBtn");
-    let spinBtn: PIXI.Sprite | undefined = this.getButton("spinBtn");
-    let bonusBtn: PIXI.Sprite | undefined = this.getButton("bonusBtn");
+    let wheelBtn: PIXI.Sprite | undefined = this.getButtonByName(
+      constants.WHEEL_BTN.NAME
+    );
+    let spinBtn: PIXI.Sprite | undefined = this.getButtonByName(
+      constants.SPIN_BTN.NAME
+    );
+    let bonusBtn: PIXI.Sprite | undefined = this.getButtonByName(
+      constants.BONUS_BTN.NAME
+    );
     spinBtn!.visible = reelsVisibility;
     bonusBtn!.visible = reelsVisibility;
     wheelBtn!.visible = !reelsVisibility;
+    this.stopDisplay.visible = reelsVisibility;
 
+    // TO Do:  remove once bonus win addition is handled
+    this.updateBalance();
     this.mainScreen.visible = reelsVisibility;
     this.bonusScreen.visible = !reelsVisibility;
   }
 
   private onTransitionCovering() {
+    this.bonusScreen.reset();
     this.updateScreenState();
 
     gsap.to(this.transitionLayer, {
@@ -352,6 +373,8 @@ export class gameController extends PIXI.Container {
   }
 
   private onTransitionComplete(nextCommand: string) {
+    this.enableGameButtons();
+
     if (nextCommand == "freespin") {
       // TO DO:  SHOW INTRO BANNER
       // gsap.delayedCall(2, this.onSpinStarted.bind(this));

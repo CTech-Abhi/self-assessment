@@ -183,6 +183,7 @@ export class Model {
       "5": 15,
     },
   };
+  private lastWonBonusPrize: number = 0;
 
   private wheelPrizes: IwheelMathData[] = [
     { value: 5000, weight: 4 },
@@ -234,7 +235,16 @@ export class Model {
       randomPrizefactor,
       this.wheelPrizes
     );
+    this.lastWonBonusPrize = this.wheelPrizes[awardedPrizeIndex].value;
     return awardedPrizeIndex;
+  }
+
+  get bonusWin() {
+    return this.lastWonBonusPrize;
+  }
+
+  public addBonusWin() {
+    this.playerBalance += this.lastWonBonusPrize;
   }
 
   get randomBet() {

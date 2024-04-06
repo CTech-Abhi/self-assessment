@@ -26,6 +26,10 @@ const config = {
                 include: /node_modules/, 
                 type: 'javascript/auto' 
             },
+            {
+                test: /\.wav$/,
+                loader: 'file-loader'
+            }
         ]
     },
     plugins: [
@@ -34,6 +38,7 @@ const config = {
             { from: 'src/index.html' },
             { from: 'src/css/style.css', to: 'css/' },
             { from: 'src/images/', to: 'images/' },
+            { from: 'src/sounds/', to: 'sounds/' },
         ]),
     ],
     devServer: {
