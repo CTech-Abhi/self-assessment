@@ -39,6 +39,7 @@ const config = {
             { from: 'src/css/style.css', to: 'css/' },
             { from: 'src/images/', to: 'images/' },
             { from: 'src/sounds/', to: 'sounds/' },
+            { from: 'src/animations/', to: 'animations/' },
         ]),
     ],
     devServer: {

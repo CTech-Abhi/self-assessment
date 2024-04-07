@@ -25,14 +25,14 @@ export class Assetloader extends PIXI.Container {
   }
 
   public startLoad(): Promise<void> {
-    PIXI.LoaderResource.setExtensionLoadType(
+    /* PIXI.LoaderResource.setExtensionLoadType(
       "wav",
       PIXI.LoaderResource.LOAD_TYPE.XHR
     );
     PIXI.LoaderResource.setExtensionXhrType(
       "wav",
       PIXI.LoaderResource.XHR_RESPONSE_TYPE.BLOB
-    );
+    ); */
     this.loader
       .add("hv1", "../images/hv1_symbol.png")
       .add("hv2", "../images/hv2_symbol.png")
@@ -47,6 +47,7 @@ export class Assetloader extends PIXI.Container {
       .add("pointer", "../images/pointer.png")
       .add("wheelSlice", "../images/wheelSlice.png")
       .add("wheel_center", "../images/wheel_center.png")
+      .add("coinAnim", "../animations/coin-anim/coin-anim.json")
       .add("sndClick", "../sounds/wheel-click.wav")
       .add("sndLanding", "../sounds/wheel-landing.wav")
       .add("sndRollup", "../sounds/credits-rollup.wav");

@@ -20,6 +20,8 @@ export class BonusScreen extends PIXI.Container {
   private winCountup: PIXI.Text;
   private balanceUpdateCallback: VoidFunction;
   private endFeatureCallback: VoidFunction;
+  private animatedCoinPool: PIXI.AnimatedSprite[] = [];
+  private coinShowerIntervalId: ReturnType<typeof setInterval> | undefined;
 
   constructor(callbackMethod: IcallbackHandler) {
     super();
@@ -45,6 +47,24 @@ export class BonusScreen extends PIXI.Container {
     this.createWheel();
     this.addPointer();
     this.addBanner();
+    this.createCoinPool();
+  }
+
+  private createCoinPool() {
+    for (let i = 0; i < 100; i++) {
+      let coinTexture = PIXI.Loader.shared.resources.coinAnim.spritesheet;
+      let animatedCoin = undefined;
+      if (coinTexture) {
+        animatedCoin = new PIXI.AnimatedSprite(
+          coinTexture.animations.coin_anim
+        );
+        animatedCoin.anchor.set(0.5);
+        animatedCoin.scale.set(0.2);
+        animatedCoin.animationSpeed = 0.2;
+        animatedCoin.loop = true;
+        this.animatedCoinPool.push(animatedCoin);
+      }
+    }
   }
 
   private addBanner() {
@@ -102,13 +122,102 @@ export class BonusScreen extends PIXI.Container {
     );
   }
 
+  private getRandomNumberInRange(start: number, end: number) {
+    let randomInRange = Math.floor(Math.random() * (end - start));
+    let selectedNum = start + randomInRange;
+    return selectedNum;
+  }
+
+  private getRandomDirection() {
+    return Math.random() < 0.5 ? -1 : 1;
+  }
+
+  private coinShooter() {
+    if (this.animatedCoinPool.length > 0) {
+      let coin = this.animatedCoinPool.pop();
+      if (coin) {
+        coin.x =
+          constants.viewport.width / 2 +
+          this.getRandomNumberInRange(0, 10) * this.getRandomDirection();
+        coin.y = constants.viewport.height;
+
+        let targetCoinX = this.getRandomNumberInRange(5, 250);
+        if (coin.x < constants.viewport.width / 2) {
+          targetCoinX = -1 * targetCoinX;
+        }
+
+        let targetY =
+          constants.viewport.height - this.getRandomNumberInRange(200, 300);
+        coin.play();
+        this.mainContainer.addChild(coin);
+        gsap.to(coin, {
+          x: constants.viewport.width / 2 + targetCoinX / 2,
+          y: targetY,
+          duration: 1,
+          ease: Quad.easeOut,
+          onCompleteParams: [coin, targetCoinX],
+          onComplete: this.onHalfwayShower.bind(this),
+        });
+      }
+    }
+  }
+
+  private playCoinCelebration() {
+    this.coinShowerIntervalId = setInterval(() => {
+      this.coinShooter();
+    }, 20);
+  }
+
+  private onHalfwayShower(coin: PIXI.AnimatedSprite, targetX: number) {
+    gsap.to(coin, {
+      x: constants.viewport.width / 2 + targetX,
+      y: constants.viewport.height,
+      duration: 1,
+      ease: Quad.easeIn,
+      onCompleteParams: [coin],
+      onComplete: (coin) => {
+        coin.stop();
+        this.mainContainer.removeChild(coin);
+        this.animatedCoinPool.push(coin);
+      },
+    });
+  }
+
+  /* private playCoinCelebration() {
+    let coinTexture = PIXI.Loader.shared.resources.coinAnim.spritesheet;
+    let coinAnimation = undefined;
+    if (coinTexture) {
+      coinAnimation = new PIXI.AnimatedSprite(coinTexture.animations.coin_anim);
+      coinAnimation.anchor.set(0.5);
+      coinAnimation.scale.set(0.2);
+      coinAnimation.animationSpeed = 0.2;
+      coinAnimation.play();
+      coinAnimation.loop = true;
+      this.popup.addChild(coinAnimation);
+      gsap.to(coinAnimation, {
+        x: 50,
+        duration: 0.5,
+        ease: Quad.easeInOut,
+        onCompleteParams: [coinAnimation],
+        onComplete: (obj) => {
+          console.log("coin :    ", obj);
+          obj.stop();
+        },
+      });
+    }
+  } */
+
   private onRollupComplete() {
     this.gameData.addBonusWin();
+    this.playCoinCelebration();
     this.balanceUpdateCallback();
-    gsap.delayedCall(
-      constants.WHEEL.CELEBRATION.CLOSING_DELAY,
-      this.endFeatureCallback
-    );
+
+    gsap.delayedCall(constants.WHEEL.CELEBRATION.COIN_SHOWER_DURATION, () => {
+      clearInterval(this.coinShowerIntervalId);
+    });
+    gsap.delayedCall(constants.WHEEL.CELEBRATION.CLOSING_DELAY, () => {
+      this.endFeatureCallback();
+    });
   }
 
   public reset() {
