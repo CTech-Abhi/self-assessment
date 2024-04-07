@@ -76,7 +76,8 @@
             "COUNT_UP_DURATION": 1,
             "CLOSING_DELAY": 4,
             "BALANCE_ADDITION_DELAY": 1,
-            "COIN_SHOWER_DURATION": 2
+            "COIN_SHOWER_DURATION": 2,
+            "COIN_POOL_SIZE":100
         }
     }
 }

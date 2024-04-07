@@ -94,7 +94,8 @@ export class BonusScreen extends PIXI.Container {
   }
 
   private createCoinPool() {
-    for (let i = 0; i < 100; i++) {
+    let totalCoins = constants.WHEEL.CELEBRATION.COIN_POOL_SIZE;
+    for (let i = 0; i < totalCoins; i++) {
       let coinTexture = PIXI.Loader.shared.resources.coinAnim.spritesheet;
       let animatedCoin = undefined;
       if (coinTexture) {
