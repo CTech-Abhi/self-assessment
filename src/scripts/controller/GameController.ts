@@ -334,6 +334,7 @@ export class GameController extends PIXI.Container {
     if (this.gameState == constants.GAMESTATE.BASEGAME) {
       this.gameState = constants.GAMESTATE.BONUSGAME;
       reelsVisibility = false;
+      this.winDisplay.text = localizeText.GOOD_LUCK;
     } else {
       this.gameState = constants.GAMESTATE.BASEGAME;
     }
@@ -352,8 +353,6 @@ export class GameController extends PIXI.Container {
     wheelBtn!.visible = !reelsVisibility;
     this.stopDisplay.visible = reelsVisibility;
 
-    // TO Do:  remove once bonus win addition is handled
-    this.updateBalance();
     this.mainScreen.visible = reelsVisibility;
     this.bonusScreen.visible = !reelsVisibility;
   }
@@ -367,24 +366,8 @@ export class GameController extends PIXI.Container {
       duration: 1,
       ease: Linear.easeNone,
       onComplete: () => {
-        this.onTransitionComplete("");
+        this.enableGameButtons();
       },
     });
-  }
-
-  private onTransitionComplete(nextCommand: string) {
-    this.enableGameButtons();
-
-    if (nextCommand == "freespin") {
-      // TO DO:  SHOW INTRO BANNER
-      // gsap.delayedCall(2, this.onSpinStarted.bind(this));
-      // this.onSpinStarted();
-    } else {
-      // TO DO:  CHECK AND SHOW OUTRO BANNER
-      /* gsap.delayedCall(0.6, () => {
-        this.eventDispature.dispatchEvent("ENABLE_BUTTONS");
-      }); */
-      // this.eventDispature.dispatchEvent("ENABLE_BUTTONS");
-    }
   }
 }

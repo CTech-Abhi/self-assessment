@@ -62,15 +62,21 @@
         "SLICE_TEXT_OFFSET_Y": -50,
         
         "BANNER": {
-            "WIDTH":560, "HEIGHT": 280, "WIN_AMOUNT_OFFSET_Y":30
+            "WIDTH":560,
+            "HEIGHT": 280,
+            "WIN_AMOUNT_OFFSET_Y":30
         },
 
         "X":450, "Y":275, "MIN_SPIN_COUNT": 5,
         "SPIN_TIME": 8,
 
         "CELEBRATION": {
-            "APPEAR_DELAY": 0.5, "APPEAR_DURATION": 0.5,
-            "COUNT_UP_DURATION": 1, "CLOSING_DELAY": 4, "BALANCE_ADDITION_DELAY": 1, "COIN_SHOWER_DURATION": 2
+            "APPEAR_DELAY": 0.5,
+            "APPEAR_DURATION": 0.5,
+            "COUNT_UP_DURATION": 1,
+            "CLOSING_DELAY": 4,
+            "BALANCE_ADDITION_DELAY": 1,
+            "COIN_SHOWER_DURATION": 2
         }
     }
 }

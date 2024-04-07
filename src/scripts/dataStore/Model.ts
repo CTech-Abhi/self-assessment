@@ -130,6 +130,7 @@ export class Model {
   private playerBalance: number = 10000;
   private possibleBets: number[] = [1, 2, 3, 5, 10];
   private selectedBet: number = 1;
+  private injectedWheelPrizeIndex: number = -1;
 
   private paylines: number[][] = [
     [1, 1, 1, 1, 1],
@@ -211,6 +212,14 @@ export class Model {
     }
   }
 
+  public set injectedWheelPrize(index: number) {
+    this.injectedWheelPrizeIndex = index;
+  }
+
+  public clearWheelInjection() {
+    this.injectedWheelPrizeIndex = -1;
+  }
+
   get totalWinAmount() {
     return this.totalWin;
   }
@@ -220,6 +229,12 @@ export class Model {
   }
 
   get weightedWheelPrize() {
+    if (this.injectedWheelPrizeIndex !== -1) {
+      this.lastWonBonusPrize =
+        this.wheelPrizes[this.injectedWheelPrizeIndex].value;
+      return this.injectedWheelPrizeIndex;
+    }
+
     let randomPrizefactor: number = Math.random() * this.totalWheelWeight;
     let awardedPrizeIndex = 0;
     for (let i = 0; i < this.wheelPrizes.length; i++) {

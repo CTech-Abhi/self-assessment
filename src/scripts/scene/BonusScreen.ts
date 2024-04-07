@@ -4,6 +4,7 @@ import { Model } from "../dataStore/Model";
 import * as constants from "../config/constants.json";
 import * as localizeText from "../config/en.json";
 
+// INTERFACE to accept the callback methods provided by the gamecontroller
 export interface IcallbackHandler {
   balanceUpdate: VoidFunction;
   switchScreens: VoidFunction;
@@ -22,6 +23,7 @@ export class BonusScreen extends PIXI.Container {
   private endFeatureCallback: VoidFunction;
   private animatedCoinPool: PIXI.AnimatedSprite[] = [];
   private coinShowerIntervalId: ReturnType<typeof setInterval> | undefined;
+  private wheelSlices: PIXI.Sprite[] = [];
 
   constructor(callbackMethod: IcallbackHandler) {
     super();
@@ -45,9 +47,50 @@ export class BonusScreen extends PIXI.Container {
   public init(): void {
     this.wheelPrizes = this.gameData.wheelPrizeList;
     this.createWheel();
-    this.addPointer();
     this.addBanner();
+    this.addPointer();
     this.createCoinPool();
+  }
+
+  private createWheel() {
+    let sliceCount = 0;
+    let startingAngle = 0;
+    while (startingAngle < 360) {
+      let slice = this.getNewSlice(sliceCount);
+      slice.angle = startingAngle;
+      this.wheel.addChild(slice);
+      sliceCount++;
+      startingAngle += this.sliceAngle;
+      this.wheelSlices.push(slice);
+      slice.interactive = true;
+      slice.cursor = "pointer";
+      slice.on("pointerdown", this.setWheelInjection, this);
+    }
+
+    this.wheel.scale.set(0.45);
+    this.wheel.x = constants.WHEEL.X;
+    this.wheel.y = constants.WHEEL.Y;
+
+    let wheelShinCover = PIXI.Sprite.from("wheel_center");
+    wheelShinCover.anchor.set(0.5);
+    this.wheel.addChild(wheelShinCover);
+  }
+
+  private getNewSlice(prizeIndex: number) {
+    let slice = PIXI.Sprite.from(constants.WHEEL.SLICE_SPRITE);
+    slice.anchor.set(0.5, 1);
+    const style = new PIXI.TextStyle({
+      fontSize: 50,
+      wordWrapWidth: 800,
+    });
+    const text = new PIXI.Text("" + this.wheelPrizes[prizeIndex], style);
+    text.anchor.set(0.5);
+    text.rotation = -Math.PI / 2;
+    text.y = -slice.height / 2 + constants.WHEEL.SLICE_TEXT_OFFSET_Y;
+    text.interactive = false;
+    slice.addChild(text);
+
+    return slice;
   }
 
   private createCoinPool() {
@@ -60,7 +103,7 @@ export class BonusScreen extends PIXI.Container {
         );
         animatedCoin.anchor.set(0.5);
         animatedCoin.scale.set(0.2);
-        animatedCoin.animationSpeed = 0.2;
+        animatedCoin.animationSpeed = 0.5;
         animatedCoin.loop = true;
         this.animatedCoinPool.push(animatedCoin);
       }
@@ -122,129 +165,6 @@ export class BonusScreen extends PIXI.Container {
     );
   }
 
-  private getRandomNumberInRange(start: number, end: number) {
-    let randomInRange = Math.floor(Math.random() * (end - start));
-    let selectedNum = start + randomInRange;
-    return selectedNum;
-  }
-
-  private getRandomDirection() {
-    return Math.random() < 0.5 ? -1 : 1;
-  }
-
-  private coinShooter() {
-    if (this.animatedCoinPool.length > 0) {
-      let coin = this.animatedCoinPool.pop();
-      if (coin) {
-        coin.x =
-          constants.viewport.width / 2 +
-          this.getRandomNumberInRange(0, 10) * this.getRandomDirection();
-        coin.y = constants.viewport.height;
-
-        let targetCoinX = this.getRandomNumberInRange(5, 250);
-        if (coin.x < constants.viewport.width / 2) {
-          targetCoinX = -1 * targetCoinX;
-        }
-
-        let targetY =
-          constants.viewport.height - this.getRandomNumberInRange(200, 300);
-        coin.play();
-        this.mainContainer.addChild(coin);
-        gsap.to(coin, {
-          x: constants.viewport.width / 2 + targetCoinX / 2,
-          y: targetY,
-          duration: 1,
-          ease: Quad.easeOut,
-          onCompleteParams: [coin, targetCoinX],
-          onComplete: this.onHalfwayShower.bind(this),
-        });
-      }
-    }
-  }
-
-  private playCoinCelebration() {
-    this.coinShowerIntervalId = setInterval(() => {
-      this.coinShooter();
-    }, 20);
-  }
-
-  private onHalfwayShower(coin: PIXI.AnimatedSprite, targetX: number) {
-    gsap.to(coin, {
-      x: constants.viewport.width / 2 + targetX,
-      y: constants.viewport.height,
-      duration: 1,
-      ease: Quad.easeIn,
-      onCompleteParams: [coin],
-      onComplete: (coin) => {
-        coin.stop();
-        this.mainContainer.removeChild(coin);
-        this.animatedCoinPool.push(coin);
-      },
-    });
-  }
-
-  /* private playCoinCelebration() {
-    let coinTexture = PIXI.Loader.shared.resources.coinAnim.spritesheet;
-    let coinAnimation = undefined;
-    if (coinTexture) {
-      coinAnimation = new PIXI.AnimatedSprite(coinTexture.animations.coin_anim);
-      coinAnimation.anchor.set(0.5);
-      coinAnimation.scale.set(0.2);
-      coinAnimation.animationSpeed = 0.2;
-      coinAnimation.play();
-      coinAnimation.loop = true;
-      this.popup.addChild(coinAnimation);
-      gsap.to(coinAnimation, {
-        x: 50,
-        duration: 0.5,
-        ease: Quad.easeInOut,
-        onCompleteParams: [coinAnimation],
-        onComplete: (obj) => {
-          console.log("coin :    ", obj);
-          obj.stop();
-        },
-      });
-    }
-  } */
-
-  private onRollupComplete() {
-    this.gameData.addBonusWin();
-    this.playCoinCelebration();
-    this.balanceUpdateCallback();
-
-    gsap.delayedCall(constants.WHEEL.CELEBRATION.COIN_SHOWER_DURATION, () => {
-      clearInterval(this.coinShowerIntervalId);
-    });
-    gsap.delayedCall(constants.WHEEL.CELEBRATION.CLOSING_DELAY, () => {
-      this.endFeatureCallback();
-    });
-  }
-
-  public reset() {
-    this.popup.alpha = 0;
-    this.winCountup.text = "0.00";
-  }
-
-  private createWheel() {
-    let sliceCount = 0;
-    let startingAngle = 0;
-    while (startingAngle < 360) {
-      let slice = this.getNewSlice(sliceCount);
-      slice.angle = startingAngle;
-      this.wheel.addChild(slice);
-      sliceCount++;
-      startingAngle += this.sliceAngle;
-    }
-
-    this.wheel.scale.set(0.45);
-    this.wheel.x = constants.WHEEL.X;
-    this.wheel.y = constants.WHEEL.Y;
-
-    let wheelShinCover = PIXI.Sprite.from("wheel_center");
-    wheelShinCover.anchor.set(0.5);
-    this.wheel.addChild(wheelShinCover);
-  }
-
   public rotateWheel(): void {
     let wheelStopIndex = this.gameData.weightedWheelPrize;
     console.log(wheelStopIndex);
@@ -265,6 +185,77 @@ export class BonusScreen extends PIXI.Container {
     });
   }
 
+  private playCoinCelebration() {
+    this.coinShowerIntervalId = setInterval(() => {
+      this.coinShooter();
+    }, 20);
+  }
+
+  private coinShooter() {
+    if (this.animatedCoinPool.length > 0) {
+      let coin = this.animatedCoinPool.pop();
+      if (coin) {
+        coin.x =
+          constants.viewport.width / 2 +
+          this.getRandomNumberInRange(0, 10) * this.getRandomDirection();
+        coin.y = constants.viewport.height;
+
+        let targetCoinX =
+          this.getRandomNumberInRange(5, 250) * this.getRandomDirection();
+        /* if (coin.x < constants.viewport.width / 2) {
+          targetCoinX = -1 * targetCoinX;
+        } */
+
+        let targetY =
+          constants.viewport.height - this.getRandomNumberInRange(200, 300);
+        coin.play();
+        this.mainContainer.addChild(coin);
+        gsap.to(coin, {
+          x: constants.viewport.width / 2 + (targetCoinX * 2) / 3,
+          y: targetY,
+          duration: 1,
+          ease: Quad.easeOut,
+          onCompleteParams: [coin, targetCoinX],
+          onComplete: this.onHalfwayShower.bind(this),
+        });
+      }
+    }
+  }
+
+  private onHalfwayShower(coin: PIXI.AnimatedSprite, targetX: number) {
+    gsap.to(coin, {
+      x: constants.viewport.width / 2 + targetX,
+      y: constants.viewport.height,
+      duration: 1,
+      ease: Quad.easeIn,
+      onCompleteParams: [coin],
+      onComplete: (coin) => {
+        coin.stop();
+        this.mainContainer.removeChild(coin);
+        this.animatedCoinPool.push(coin);
+      },
+    });
+  }
+
+  private onRollupComplete() {
+    this.gameData.addBonusWin();
+    this.playCoinCelebration();
+    this.balanceUpdateCallback();
+
+    gsap.delayedCall(constants.WHEEL.CELEBRATION.COIN_SHOWER_DURATION, () => {
+      clearInterval(this.coinShowerIntervalId);
+    });
+    gsap.delayedCall(constants.WHEEL.CELEBRATION.CLOSING_DELAY, () => {
+      this.endFeatureCallback();
+    });
+  }
+
+  private setWheelInjection(evt: MouseEvent) {
+    this.gameData.injectedWheelPrize = this.wheelSlices.indexOf(
+      evt.currentTarget as unknown as PIXI.Sprite
+    );
+  }
+
   private addCelebrationPopup() {
     this.popup.alpha = 0;
     gsap.to(this.popup, {
@@ -277,19 +268,21 @@ export class BonusScreen extends PIXI.Container {
     });
   }
 
-  private getNewSlice(prizeIndex: number) {
-    let slice = PIXI.Sprite.from(constants.WHEEL.SLICE_SPRITE);
-    slice.anchor.set(0.5, 1);
-    const style = new PIXI.TextStyle({
-      fontSize: 50,
-      wordWrapWidth: 800,
-    });
-    const text = new PIXI.Text("" + this.wheelPrizes[prizeIndex], style);
-    text.anchor.set(0.5);
-    text.rotation = -Math.PI / 2;
-    text.y = -slice.height / 2 + constants.WHEEL.SLICE_TEXT_OFFSET_Y;
-    slice.addChild(text);
+  public reset() {
+    this.popup.alpha = 0;
+    this.winCountup.text = "0.00";
+    this.gameData.clearWheelInjection();
+  }
 
-    return slice;
+  //  -------------       UTILITY METHODS        ---------------------
+
+  private getRandomNumberInRange(start: number, end: number) {
+    let randomInRange = Math.floor(Math.random() * (end - start));
+    let selectedNum = start + randomInRange;
+    return selectedNum;
+  }
+
+  private getRandomDirection() {
+    return Math.random() < 0.5 ? -1 : 1;
   }
 }
