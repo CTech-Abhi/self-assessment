@@ -71,8 +71,8 @@ ENV NODE_OPTIONS="--openssl-legacy-provider"
                      |     |      |      /    \    |       |   |      |   | |     |  \  |         |
                      |     |      |____ /      \   |       |   |      |   | |___  |   \ |___      |
                      |                                                                            |
-                     |                                                                            |
-                     |              # https://ctech-wheel-bonus.netlify.app/                      |
+                     |
+                                    # https://ctech-wheel-bonus.netlify.app/
                      |                                                                            |
                      |                                                                            |
                      ------------------------------------------------------------------------------
