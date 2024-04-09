@@ -64,15 +64,12 @@ ENV NODE_OPTIONS="--openssl-legacy-provider"
 - Debug panel :  
   To inject the cheat the wheel bonus, click on the wheel slice that you want to win and start the wheel.
 
-                     ------------------------------------------------------------------------------
-                     |      ____                             _____           ___   ___   ___      |
-                     |     |    | |        /\   \     /    |   |      |   | |     |   | |         |
-                     |     |____| |       /__\    \ /      |   |      |___| |__   |___| |__       |
-                     |     |      |      /    \    |       |   |      |   | |     |  \  |         |
-                     |     |      |____ /      \   |       |   |      |   | |___  |   \ |___      |
-                     |                                                                            |
-                     |
-                                    # https://ctech-wheel-bonus.netlify.app/
-                     |                                                                            |
-                     |                                                                            |
-                     ------------------------------------------------------------------------------
+  # Play it here
+
+  https://ctech-wheel-bonus.netlify.app/
+
+  # References
+
+  used one of my own portfolio app as a boiler-plate :
+  https://github.com/CTech-Abhi/slot-machine-test  
+   deployed at : https://ctech-abhi-slotdemo.netlify.app/
