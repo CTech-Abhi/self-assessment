@@ -47,14 +47,7 @@ export class Assetloader extends PIXI.Container {
       .add("pointer", "../images/pointer.png")
       .add("wheelSlice", "../images/wheelSlice.png")
       .add("wheel_center", "../images/wheel_center.png")
-      .add("coinAnim", "../animations/coin-anim/coin-anim.json")
-      .add("sndClick", "../sounds/wheel-click.wav")
-      .add("sndLanding", "../sounds/wheel-landing.wav")
-      .add("sndRollup", "../sounds/credits-rollup.wav");
-
-    /* sound.add("sndClick", "../sounds/wheel-click.wav");
-    sound.add("wheelSlice", "../images/wheelSlice.png");
-    sound.add("wheel_center", "../images/wheel_center.png"); */
+      .add("coinAnim", "../animations/coin-anim/coin-anim.json");
 
     this.loader.load(this.onLoadComplete.bind(this));
     this.loader.onProgress.add(this.progressUpdate.bind(this));

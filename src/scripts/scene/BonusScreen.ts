@@ -10,6 +10,11 @@ export interface IcallbackHandler {
   switchScreens: VoidFunction;
 }
 
+export interface IsoundMap {
+  wheelLand: Howl | null;
+  countUp: Howl | null;
+}
+
 export class BonusScreen extends PIXI.Container {
   private mainContainer: PIXI.Container = new PIXI.Container();
   private wheel: PIXI.Container = new PIXI.Container();
@@ -24,6 +29,10 @@ export class BonusScreen extends PIXI.Container {
   private animatedCoinPool: PIXI.AnimatedSprite[] = [];
   private coinShowerIntervalId: ReturnType<typeof setInterval> | undefined;
   private wheelSlices: PIXI.Sprite[] = [];
+  private gameSounds: IsoundMap = {
+    wheelLand: null,
+    countUp: null,
+  };
 
   constructor(callbackMethod: IcallbackHandler) {
     super();
@@ -50,6 +59,18 @@ export class BonusScreen extends PIXI.Container {
     this.addBanner();
     this.addPointer();
     this.createCoinPool();
+    this.addGameSounds();
+  }
+
+  private addGameSounds() {
+    this.gameSounds.wheelLand = new Howl({
+      src: [constants.soundMap.sndLanding],
+    });
+
+    this.gameSounds.countUp = new Howl({
+      src: [constants.soundMap.sndRollup],
+      loop: true,
+    });
   }
 
   private createWheel() {
@@ -145,6 +166,7 @@ export class BonusScreen extends PIXI.Container {
   }
 
   private addCountup() {
+    this.gameSounds.countUp?.play();
     this.winCountup.visible = true;
     this.winCountup.text = "0.00";
     this.winCountup.alpha = 1;
@@ -167,6 +189,7 @@ export class BonusScreen extends PIXI.Container {
   }
 
   public rotateWheel(): void {
+    this.wheel.interactiveChildren = false;
     let wheelStopIndex = this.gameData.weightedWheelPrize;
     console.log(wheelStopIndex);
 
@@ -218,6 +241,7 @@ export class BonusScreen extends PIXI.Container {
   }
 
   private onRollupComplete() {
+    this.gameSounds.countUp?.stop();
     this.gameData.addBonusWin();
     this.playCoinCelebration();
     this.balanceUpdateCallback();
@@ -237,6 +261,7 @@ export class BonusScreen extends PIXI.Container {
   }
 
   private addCelebrationPopup() {
+    this.gameSounds.wheelLand?.play();
     this.popup.alpha = 0;
     gsap.to(this.popup, {
       alpha: 1,
@@ -252,6 +277,7 @@ export class BonusScreen extends PIXI.Container {
     this.popup.alpha = 0;
     this.winCountup.text = "0.00";
     this.gameData.clearWheelInjection();
+    this.wheel.interactiveChildren = true;
   }
 
   //  -------------       UTILITY METHODS        ---------------------

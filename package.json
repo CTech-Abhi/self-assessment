@@ -14,6 +14,7 @@
   "author": "Abhishek Singhal <abhicasinotech@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "@types/howler": "^2.2.11",
     "@types/jest": "^29.5.0",
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^5.1.1",
@@ -30,6 +31,7 @@
   "dependencies": {
     "@pixi/sound": "^5.0.0",
     "gsap": "^3.11.5",
+    "howler": "^2.2.3",
     "pixi.js": "6.3.2",
     "url-loader": "^4.1.1"
   }

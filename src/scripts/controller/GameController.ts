@@ -6,6 +6,7 @@ import { BonusScreen } from "../scene/BonusScreen";
 import { MainScreen } from "../scene/MainScreen";
 import { OverlayPanel } from "../scene/OverlayPanel";
 import * as constants from "../config/constants.json";
+import { Howl } from "howler";
 
 export interface IButtonView {
   SPRITE: string;
@@ -132,7 +133,13 @@ export class GameController extends PIXI.Container {
     );
     this.disableButton(wheelBtn);
     this.bonusScreen.rotateWheel();
-    // sound.play("sndClick");
+
+    let sound = new Howl({
+      src: [constants.soundMap.sndClick],
+      html5: true,
+    });
+
+    sound.play();
   }
 
   private disableGameButtons() {

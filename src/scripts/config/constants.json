@@ -79,5 +79,11 @@
             "COIN_SHOWER_DURATION": 2.5,
             "COIN_POOL_SIZE":100
         }
+    },
+
+    "soundMap": {
+        "sndClick": "../../sounds/wheel-click.wav",
+        "sndLanding": "../../sounds/wheel-landing.wav",
+        "sndRollup": "../../sounds/credits-rollup.wav"
     }
 }

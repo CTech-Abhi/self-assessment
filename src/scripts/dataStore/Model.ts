@@ -213,6 +213,7 @@ export class Model {
   }
 
   public set injectedWheelPrize(index: number) {
+    console.log("injected cheat:  ", index);
     this.injectedWheelPrizeIndex = index;
   }
 
