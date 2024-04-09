@@ -39,6 +39,7 @@ ENV NODE_OPTIONS="--openssl-legacy-provider"
 - PIXI v6
 - GSAP 3
 - Howler
+- Webpack
 
 # Game Behavior
 
@@ -52,6 +53,7 @@ ENV NODE_OPTIONS="--openssl-legacy-provider"
   - On roll up complete, balnce meter will update.
 
 - We also have a bonus button on the main screen
+
   -On clicking the bonus button, it will add a transition and take us to the wheel screen.
   -On this screen we have a start button, clicking on it will make the wheel spin.
   -Weight table for the wheel is defined inside model.ts, using it a win will be decided and the corrosponding slice will land on the wheel pointer.
@@ -64,12 +66,13 @@ ENV NODE_OPTIONS="--openssl-legacy-provider"
 - Debug panel :  
   To inject the cheat the wheel bonus, click on the wheel slice that you want to win and start the wheel.
 
-  # Play it here
+- Play it here
 
   https://ctech-wheel-bonus.netlify.app/
 
-  # References
+- References
 
-  used one of my own portfolio app as a boiler-plate :
-  https://github.com/CTech-Abhi/slot-machine-test  
-   deployed at : https://ctech-abhi-slotdemo.netlify.app/
+  Used one of my own portfolio app as boiler-plate :
+
+  Github : https://github.com/CTech-Abhi/slot-machine-test  
+  deployed at : https://ctech-abhi-slotdemo.netlify.app/
