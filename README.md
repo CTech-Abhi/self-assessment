@@ -34,20 +34,27 @@ $env:NODE_OPTIONS="--openssl-legacy-provider"
 
 ENV NODE_OPTIONS="--openssl-legacy-provider"
 
+# Tech and Tools
+
+- PIXI v6
+- GSAP 3
+- Howler
+
 # Game Behavior
 
 - Click spin button to see next result.
-  Clicking on the spin button will deduct a random bet from [1, 2, 3, 5, 10], player balance will reduce accordingly.
-  As the spin result the new reel stop positions will be displayed on the left bottom, symbols on the reel will change accordingly.
 
-  In case of user win, winning details will display below the reel area ( replacing good luck msg ).
-  A quick rollup will play to the total win amount and will be placed right below the balance meter.
-  On roll up complete, balnce meter will update.
+  - Clicking on the spin button will deduct a random bet from [1, 2, 3, 5, 10], player balance will reduce accordingly.
+  - As the spin result the new reel stop positions will be displayed on the left bottom, symbols on the reel will change accordingly.
+
+  - In case of user win, winning details will display below the reel area ( replacing good luck msg ).
+  - A quick rollup will play to the total win amount and will be placed right below the balance meter.
+  - On roll up complete, balnce meter will update.
 
 - We also have a bonus button on the main screen
-  On clicking the bonus button, it will add a transition and take us to the wheel screen.
-  On this screen we have a start button, clicking on it will make the wheel spin.
-  Weight table for the wheel is defined inside model.ts, using it a win will be decided and the corrosponding slice will land on the wheel pointer.
+  -On clicking the bonus button, it will add a transition and take us to the wheel screen.
+  -On this screen we have a start button, clicking on it will make the wheel spin.
+  -Weight table for the wheel is defined inside model.ts, using it a win will be decided and the corrosponding slice will land on the wheel pointer.
 
   - Celebration
     To celebrate the wheel win, a popup will appear right over the wheel.
@@ -56,3 +63,16 @@ ENV NODE_OPTIONS="--openssl-legacy-provider"
 
 - Debug panel :  
   To inject the cheat the wheel bonus, click on the wheel slice that you want to win and start the wheel.
+
+                     ------------------------------------------------------------------------------
+                     |      ____                             _____           ___   ___   ___      |
+                     |     |    | |        /\   \     /    |   |      |   | |     |   | |         |
+                     |     |____| |       /__\    \ /      |   |      |___| |__   |___| |__       |
+                     |     |      |      /    \    |       |   |      |   | |     |  \  |         |
+                     |     |      |____ /      \   |       |   |      |   | |___  |   \ |___      |
+                     |                                                                            |
+                     |                                                                            |
+                     |              # https://ctech-wheel-bonus.netlify.app/                      |
+                     |                                                                            |
+                     |                                                                            |
+                     ------------------------------------------------------------------------------
