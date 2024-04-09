@@ -44,8 +44,8 @@ ENV NODE_OPTIONS="--openssl-legacy-provider"
 
 - Click spin button to see next result.
 
-  - Clicking on the spin button will deduct a random bet from [1, 2, 3, 5, 10], player balance will reduce accordingly.
-  - As the spin result the new reel stop positions will be displayed on the left bottom, symbols on the reel will change accordingly.
+  - Clicking on the spin button will deduct a random bet from [1, 2, 3, 5, 10], player balance will reduce accordingly. ( can be seen under the logs )
+  - As the spin result the new reel stop positions will be displayed on the bottom left of the screen, symbols on the reel will change accordingly.
 
   - In case of user win, winning details will display below the reel area ( replacing good luck msg ).
   - A quick rollup will play to the total win amount and will be placed right below the balance meter.
