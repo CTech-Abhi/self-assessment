@@ -196,46 +196,25 @@ export class BonusScreen extends PIXI.Container {
     if (this.animatedCoinPool.length > 0) {
       let coin = this.animatedCoinPool.pop();
       if (coin) {
-        coin.x =
-          constants.viewport.width / 2 +
-          this.getRandomNumberInRange(0, 10) * this.getRandomDirection();
-        coin.y = constants.viewport.height;
-
-        let targetCoinX =
-          this.getRandomNumberInRange(5, 250) * this.getRandomDirection();
-        /* if (coin.x < constants.viewport.width / 2) {
-          targetCoinX = -1 * targetCoinX;
-        } */
-
-        let targetY =
-          constants.viewport.height - this.getRandomNumberInRange(200, 300);
+        coin.x = this.getRandomNumberInRange(0, constants.viewport.width);
+        coin.y = 0;
         coin.play();
+        coin.alpha = 1;
         this.mainContainer.addChild(coin);
         gsap.to(coin, {
-          x: constants.viewport.width / 2 + (targetCoinX * 2) / 3,
-          y: targetY,
-          duration: 1,
-          ease: Quad.easeOut,
-          onCompleteParams: [coin, targetCoinX],
-          onComplete: this.onHalfwayShower.bind(this),
+          alpha: 0.1,
+          y: constants.viewport.height,
+          duration: 1.2,
+          ease: Linear.easeOut,
+          onCompleteParams: [coin],
+          onComplete: (coin) => {
+            coin.stop();
+            this.mainContainer.removeChild(coin);
+            this.animatedCoinPool.push(coin);
+          },
         });
       }
     }
-  }
-
-  private onHalfwayShower(coin: PIXI.AnimatedSprite, targetX: number) {
-    gsap.to(coin, {
-      x: constants.viewport.width / 2 + targetX,
-      y: constants.viewport.height,
-      duration: 1,
-      ease: Quad.easeIn,
-      onCompleteParams: [coin],
-      onComplete: (coin) => {
-        coin.stop();
-        this.mainContainer.removeChild(coin);
-        this.animatedCoinPool.push(coin);
-      },
-    });
   }
 
   private onRollupComplete() {
@@ -283,7 +262,7 @@ export class BonusScreen extends PIXI.Container {
     return selectedNum;
   }
 
-  private getRandomDirection() {
+  /* private getRandomDirection() {
     return Math.random() < 0.5 ? -1 : 1;
-  }
+  } */
 }

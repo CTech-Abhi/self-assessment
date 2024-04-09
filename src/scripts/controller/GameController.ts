@@ -4,8 +4,8 @@ import { Model } from "../dataStore/Model";
 import { gsap, Linear } from "gsap";
 import { BonusScreen } from "../scene/BonusScreen";
 import { MainScreen } from "../scene/MainScreen";
+import { OverlayPanel } from "../scene/OverlayPanel";
 import * as constants from "../config/constants.json";
-import * as localizeText from "../config/en.json";
 
 export interface IButtonView {
   SPRITE: string;
@@ -17,52 +17,32 @@ export interface IButtonView {
 
 export class GameController extends PIXI.Container {
   private gameData: Model;
-  private winDisplay: PIXI.Text;
-  private balanceDisplay: PIXI.Text;
-  private stopDisplay: PIXI.Text;
-  private winDisplayMaxHeight = constants.maxWinPanelHeight;
-  private countup: PIXI.Text;
   private transitionLayer: PIXI.Sprite = new PIXI.Sprite();
   private gameState: string = constants.GAMESTATE.INIT;
   private gameButtons: PIXI.Sprite[] = [];
   private bonusScreen: BonusScreen;
   private mainScreen: MainScreen;
+  private betPanel: OverlayPanel;
 
   constructor() {
     super();
     this.gameData = Model.getInstance();
-    this.winDisplay = this.createWinText();
-    this.balanceDisplay = this.createBalanceMeter();
-    this.stopDisplay = this.createStopDisplay();
+    this.betPanel = new OverlayPanel();
 
     this.mainScreen = new MainScreen();
     this.bonusScreen = new BonusScreen({
       balanceUpdate: this.updateBalance.bind(this),
       switchScreens: this.startTransition.bind(this),
     });
-
-    this.countup = new PIXI.Text(
-      "",
-      new PIXI.TextStyle(constants.mainGameCountUpFont as PIXI.ITextStyle)
-    );
   }
 
   private setupUI() {
     const mainBg = PIXI.Sprite.from(constants.background.sprite);
     this.addChild(mainBg);
-    this.addChild(this.winDisplay);
-    this.addChild(this.balanceDisplay);
-    this.addChild(this.stopDisplay);
-    this.addChild(this.countup);
 
-    this.updateBalance();
-
-    this.addChild(this.countup);
-    this.countup.x = this.balanceDisplay.x;
-    this.countup.y =
-      this.balanceDisplay.y +
-      this.balanceDisplay.height +
-      constants.winCountUpMargin;
+    this.betPanel.init();
+    this.addChild(this.betPanel);
+    this.betPanel.updateBalance();
 
     this.mainScreen.init();
     this.bonusScreen.init();
@@ -99,20 +79,8 @@ export class GameController extends PIXI.Container {
     return selectedButton;
   }
 
-  private createBalanceMeter() {
-    const style = new PIXI.TextStyle(
-      constants.BALANCE_METER.balnceMeterTextStyle
-    );
-    const text = new PIXI.Text(localizeText.BALANCE_METER, style);
-    this.addChild(text);
-    text.x = constants.BALANCE_METER.X;
-    text.y = constants.BALANCE_METER.Y;
-    return text;
-  }
-
   private updateBalance() {
-    this.balanceDisplay.text =
-      localizeText.BALANCE_METER + this.gameData.balance;
+    this.betPanel.updateBalance();
   }
 
   private addButton(btnView: IButtonView) {
@@ -164,7 +132,7 @@ export class GameController extends PIXI.Container {
     );
     this.disableButton(wheelBtn);
     this.bonusScreen.rotateWheel();
-    // gsap.delayedCall(12, this.startTransition.bind(this));
+    // sound.play("sndClick");
   }
 
   private disableGameButtons() {
@@ -197,41 +165,11 @@ export class GameController extends PIXI.Container {
   }
 
   private startWheelBonus() {
-    // sound.play("sndClick");
     this.disableGameButtons();
     this.startTransition();
   }
 
-  private createWinText() {
-    const style = new PIXI.TextStyle({
-      wordWrap: true,
-      fill: "#ece4e4",
-      wordWrapWidth: 800,
-    });
-    const text = new PIXI.Text(localizeText.GOOD_LUCK, style);
-    this.addChild(text);
-    text.x = constants.WIN_TEXT.X;
-    text.y = constants.WIN_TEXT.Y;
-    return text;
-  }
-
-  private createStopDisplay() {
-    const style = new PIXI.TextStyle({
-      wordWrap: true,
-      fill: "#ece4e4",
-      wordWrapWidth: 200,
-    });
-    const text = new PIXI.Text(
-      localizeText.STOP_POSITION + this.gameData.reelstops,
-      style
-    );
-    this.addChild(text);
-    text.x = constants.STOP_POS_TEXT.X;
-    text.y = constants.STOP_POS_TEXT.Y;
-    return text;
-  }
-
-  private handleSpinRequest() {
+  private async handleSpinRequest() {
     let reels = this.gameData.reelsetData;
     let bet = this.gameData.randomBet;
     const newReelStops: number[] = [];
@@ -239,82 +177,23 @@ export class GameController extends PIXI.Container {
     this.disableGameButtons();
     console.log("Placing BET   ::     ", bet);
     this.gameData.placeBet();
-    this.updateBalance();
+    this.betPanel.updateBalance();
 
     for (let i = 0; i < reels.length; i++) {
       newReelStops.push(Math.floor(Math.random() * reels[i].length));
     }
     this.gameData.reelstops = newReelStops;
     this.mainScreen.updateReelsWithNewStop();
+    this.betPanel.updateStopPositionData();
 
-    this.stopDisplay.text =
-      localizeText.STOP_POSITION + this.gameData.reelstops;
-    this.showWinDetails();
-  }
-
-  private showWinDetails() {
-    const winLines = this.gameData.winningLines;
-    const totalWin = this.gameData.totalWinAmount;
-    this.winDisplay.scale.set(1);
-
-    let winData = totalWin
-      ? localizeText.TOTAL_WIN + this.gameData.totalWinAmount
-      : localizeText.GOOD_LUCK;
-    for (let i = 0; i < winLines.length; i++) {
-      winData += "\n";
-      winData +=
-        localizeText.PAYLINE_TEXT +
-        winLines[i].index +
-        ", " +
-        winLines[i].symbol +
-        " x" +
-        winLines[i].count +
-        ", " +
-        winLines[i].payout;
-    }
-
-    this.winDisplay.text = winData;
-    if (this.winDisplay.height > this.winDisplayMaxHeight) {
-      this.winDisplay.scale.set(
-        this.winDisplayMaxHeight / this.winDisplay.height
-      );
-    }
-
+    this.betPanel.showWinDetails();
     if (this.gameData.totalWinAmount) {
       this.disableGameButtons();
-      this.addCountup();
+      await this.betPanel.addCountup();
+      this.enableGameButtons();
     } else {
       this.enableGameButtons();
     }
-  }
-
-  private addCountup() {
-    this.countup.visible = true;
-    this.countup.text = "0.00";
-    this.countup.alpha = 1;
-
-    var counter = { value: 0 };
-    gsap.to(counter, {
-      duration: 1,
-      value: this.gameData.totalWinAmount,
-      ease: Linear.easeNone,
-      onUpdate: () => {
-        this.countup.text = "$" + counter.value.toFixed(2);
-      },
-    });
-
-    this.countup.alpha = 1;
-    gsap.to(this.countup, {
-      alpha: 0,
-      delay: 2,
-      duration: 0.2,
-      ease: Linear.easeNone,
-      onComplete: () => {
-        this.gameData.addWinnings();
-        this.updateBalance();
-        this.enableGameButtons();
-      },
-    });
   }
 
   private startTransition(delay: number = 0) {
@@ -334,7 +213,7 @@ export class GameController extends PIXI.Container {
     if (this.gameState == constants.GAMESTATE.BASEGAME) {
       this.gameState = constants.GAMESTATE.BONUSGAME;
       reelsVisibility = false;
-      this.winDisplay.text = localizeText.GOOD_LUCK;
+      this.betPanel.updateWinDisplay(this.gameState);
     } else {
       this.gameState = constants.GAMESTATE.BASEGAME;
     }
@@ -351,7 +230,7 @@ export class GameController extends PIXI.Container {
     spinBtn!.visible = reelsVisibility;
     bonusBtn!.visible = reelsVisibility;
     wheelBtn!.visible = !reelsVisibility;
-    this.stopDisplay.visible = reelsVisibility;
+    this.betPanel.updateStopPositionDisplay(reelsVisibility);
 
     this.mainScreen.visible = reelsVisibility;
     this.bonusScreen.visible = !reelsVisibility;

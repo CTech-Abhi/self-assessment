@@ -30,6 +30,7 @@
   "dependencies": {
     "@pixi/sound": "^5.0.0",
     "gsap": "^3.11.5",
-    "pixi.js": "6.3.2"
+    "pixi.js": "6.3.2",
+    "url-loader": "^4.1.1"
   }
 }
